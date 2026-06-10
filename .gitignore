@@ -1,0 +1,9 @@
+backend/venv/
+backend/.env
+backend/uploads/*
+!backend/uploads/.gitkeep
+backend/smart_wardrobe_resnet50.pt
+frontend/node_modules/
+frontend/dist/
+__pycache__/
+*.pyc
