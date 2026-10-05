@@ -1,30 +1,34 @@
 # Smart Wardrobe Web
 
-Project này gồm 2 phần rõ ràng:
+Smart Wardrobe Web is a web application that allows users to manage their personal wardrobe and use an AI model to classify uploaded clothing images.
 
-- `frontend/`: React + Vite giao diện tủ đồ
-- `backend/`: FastAPI + MongoDB + PyTorch model
+The project consists of two main parts:
 
-## Chức năng chính
+- `frontend/`: React + Vite frontend for the wardrobe user interface
+- `backend/`: FastAPI + MongoDB + PyTorch backend with an AI classification model
 
-1. Đăng ký / đăng nhập tài khoản.
-2. Upload ảnh quần áo.
-3. Backend gọi model `smart_wardrobe_resnet50.pt` để phân loại nhãn AI:
+---
+
+## Main Features
+
+1. User registration and login.
+2. Upload clothing images.
+3. The backend uses the `smart_wardrobe_resnet50.pt` model to classify uploaded images into AI labels:
    - `men_hot`
    - `men_cold`
    - `women_hot`
    - `women_cold`
-4. Vì model hiện tại chưa phân loại được áo/quần/giày/phụ kiện, frontend cho người dùng tự chọn mục tủ đồ trước khi lưu.
-5. Item được lưu vào MongoDB theo từng tài khoản đăng nhập.
-6. Frontend hiển thị tủ đồ thành 4 nhóm:
-   - Áo
-   - Quần
-   - Giày
-   - Phụ kiện
+4. Since the current model cannot classify clothing types such as tops, bottoms, shoes, or accessories, users manually select the wardrobe category before saving an item.
+5. Wardrobe items are stored in MongoDB and linked to each logged-in user.
+6. The frontend displays wardrobe items in four categories:
+   - Tops
+   - Bottoms
+   - Shoes
+   - Accessories
 
 ---
 
-## Cấu trúc thư mục
+## Project Structure
 
 ```txt
 smart_wardrobe_web/
@@ -57,89 +61,91 @@ smart_wardrobe_web/
 
 ---
 
-## Cài đặt MongoDB
+## MongoDB Setup
 
-Bạn có 2 cách:
+There are two ways to configure MongoDB.
 
-### Cách 1: MongoDB local
+### Option 1: Local MongoDB
 
-Cài MongoDB Community Server rồi chạy MongoDB ở:
+Install MongoDB Community Server and run MongoDB locally at:
 
 ```txt
 mongodb://localhost:27017
 ```
 
-### Cách 2: MongoDB Atlas
+### Option 2: MongoDB Atlas
 
-Tạo cluster trên MongoDB Atlas rồi thay `MONGO_URI` trong file `.env`.
+Create a cluster on MongoDB Atlas and replace the `MONGO_URI` value in your `.env` file with your Atlas connection string.
 
 ---
 
-## Chạy backend
+## Running the Backend
 
-Vào thư mục backend:
+Navigate to the backend directory:
 
 ```bash
 cd backend
 ```
 
-Tạo virtual environment:
+Create a Python virtual environment:
 
 ```bash
 python -m venv venv
 ```
 
-Kích hoạt môi trường:
+Activate the virtual environment.
 
-Windows:
+### Windows
 
 ```bash
 venv\Scripts\activate
 ```
 
-Mac/Linux:
+### macOS/Linux
 
 ```bash
 source venv/bin/activate
 ```
 
-Cài thư viện:
+Install the required Python packages:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Tạo file `.env` từ mẫu:
+Create a `.env` file from the provided example.
+
+### Windows
 
 ```bash
 copy .env.example .env
 ```
 
-Nếu dùng Mac/Linux:
+### macOS/Linux
 
 ```bash
 cp .env.example .env
 ```
 
-Đặt file model của bạn vào thư mục `backend/`:
+Place the trained model file inside the `backend/` directory:
 
 ```txt
 backend/smart_wardrobe_resnet50.pt
 ```
 
-Chạy backend:
+Start the FastAPI backend:
 
 ```bash
 uvicorn app.main:app --reload
 ```
 
-Backend chạy tại:
+The backend will be available at:
 
 ```txt
 http://localhost:8000
 ```
 
-API docs:
+FastAPI API documentation is available at:
 
 ```txt
 http://localhost:8000/docs
@@ -147,17 +153,27 @@ http://localhost:8000/docs
 
 ---
 
-## Chạy frontend
+## Running the Frontend
 
-Mở terminal mới:
+Open a new terminal and navigate to the frontend directory:
 
 ```bash
 cd frontend
+```
+
+Install the required dependencies:
+
+```bash
 npm install
+```
+
+Start the Vite development server:
+
+```bash
 npm run dev
 ```
 
-Frontend chạy tại:
+The frontend will be available at:
 
 ```txt
 http://localhost:5173
@@ -165,64 +181,125 @@ http://localhost:5173
 
 ---
 
-## Lưu ý về model `.pt`
+## PyTorch Model Notes
 
-File `backend/app/model_service.py` đang hỗ trợ 2 kiểu model phổ biến:
-
-1. Bạn save nguyên model:
-
-```python
-torch.save(model, "smart_wardrobe_resnet50.pt")
-```
-
-2. Bạn save `state_dict`:
-
-```python
-torch.save(model.state_dict(), "smart_wardrobe_resnet50.pt")
-```
-
-Nếu bạn train ResNet50 với số class khác hoặc thứ tự label khác, hãy sửa biến `LABELS` trong:
+The file:
 
 ```txt
 backend/app/model_service.py
 ```
 
-Hiện tại:
+currently supports two common ways of saving a PyTorch model.
+
+### 1. Saving the Entire Model
+
+```python
+torch.save(model, "smart_wardrobe_resnet50.pt")
+```
+
+### 2. Saving Only the `state_dict`
+
+```python
+torch.save(model.state_dict(), "smart_wardrobe_resnet50.pt")
+```
+
+If your ResNet50 model was trained with a different number of classes or a different label order, update the `LABELS` variable in:
+
+```txt
+backend/app/model_service.py
+```
+
+The current configuration is:
 
 ```python
 LABELS = ["men_hot", "men_cold", "women_hot", "women_cold"]
 ```
 
-Nếu model của bạn dùng thứ tự khác, kết quả hiển thị sẽ bị sai nhãn.
+The order of these labels must match the class order used when training the model.
+
+If the order is incorrect, the model may return the wrong label even if the prediction itself is correct.
 
 ---
 
-## Database MongoDB
+## MongoDB Database
 
-Database mặc định:
+The default database name is:
 
 ```txt
 smart_wardrobe
 ```
 
-Collections:
+The application uses two main collections:
 
 ```txt
 users
 wardrobe_items
 ```
 
-Một item được lưu dạng gần như sau:
+### Example Wardrobe Item
+
+A wardrobe item stored in MongoDB has a structure similar to:
 
 ```json
 {
   "user_id": "...",
   "category": "tops",
-  "category_name": "Áo",
-  "name": "White shirt",
+  "category_name": "Tops",
+  "name": "White Shirt",
   "image_url": "/uploads/filename.jpg",
   "ai_label": "women_hot",
   "ai_confidence": 0.93,
   "created_at": "..."
 }
 ```
+
+---
+
+## Technology Stack
+
+### Frontend
+
+- React
+- Vite
+- JavaScript
+- CSS
+
+### Backend
+
+- Python
+- FastAPI
+- PyTorch
+- MongoDB
+
+### AI Model
+
+- ResNet50
+- PyTorch `.pt` model
+
+---
+
+## Application Workflow
+
+The basic workflow of the application is:
+
+```txt
+User
+  ↓
+Register / Login
+  ↓
+Upload Clothing Image
+  ↓
+Select Wardrobe Category
+  ↓
+FastAPI Backend
+  ↓
+PyTorch ResNet50 Model
+  ↓
+AI Classification
+  ↓
+Save Item to MongoDB
+  ↓
+Display Item in User's Wardrobe
+```
+
+Each wardrobe item belongs to the currently logged-in user, allowing multiple users to maintain separate wardrobes in the same application.
